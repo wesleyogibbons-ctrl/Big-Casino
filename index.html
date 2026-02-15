@@ -1,0 +1,108 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Wes's Casino</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <header>
+        <h1>WES'S CASINO</h1>
+        <div id="status-bar">
+            <h2 id="balance-display">Balance: $20,000</h2>
+            <h2 id="debt-display" style="color: #ff4d4d;">Debt: $0</h2>
+        </div>
+    </header>
+
+    <section class="bank-box">
+        <h2 class="gold">The Bank of Wes</h2>
+        <div class="bank-controls">
+            <p>15% Daily Interest | Collector threshold: $50,000</p>
+            <button id="takeLoanBtn" class="casino-btn">Take $5k Loan</button>
+            <button id="payLoanBtn" class="casino-btn" style="background: #4caf50;">Pay Back $5k</button>
+        </div>
+    </section>
+
+    <main class="main-container">
+        <section class="game-box">
+            <h2 class="gold">Slots</h2>
+            <div id="slot-container">
+                <span id="s1">🍒</span><span id="s2">🍒</span><span id="s3">🍒</span>
+            </div>
+            <input type="number" id="slotBet" placeholder="Bet $">
+            <button id="spinSlotsBtn" class="casino-btn">SPIN SLOTS</button>
+            <div id="slotOutput" class="output">Pull the lever!</div>
+        </section>
+
+        <section class="game-box">
+            <h2 class="gold">Roulette</h2>
+            <div id="roulette-wheel">?</div>
+            <div class="input-row">
+                <input type="text" id="numberInput" placeholder="Num (0-36/00)">
+                <input type="number" id="numberBet" placeholder="Bet $">
+            </div>
+            <div class="input-row">
+                <select id="evenInput"><option value="">Even/Odd</option><option value="Even">Even</option><option value="Odd">Odd</option></select>
+                <input type="number" id="evenBet" placeholder="Bet $">
+            </div>
+            <div class="input-row">
+                <select id="colorInput"><option value="">Color</option><option value="Red">Red</option><option value="Black">Black</option></select>
+                <input type="number" id="colorBet" placeholder="Bet $">
+            </div>
+            <button id="spinButton" class="casino-btn">SPIN WHEEL</button>
+            <div id="rouletteOutput" class="output">Place your bets!</div>
+        </section>
+
+        <section class="game-box">
+            <h2 class="gold">Blackjack</h2>
+            <div id="dealer-hand" class="hand">Dealer: Waiting...</div>
+            <div id="player-hand" class="hand">Player: Waiting...</div>
+            <input type="number" id="bjBet" placeholder="Bet $">
+            <div class="bj-btns">
+                <button id="dealBtn" class="casino-btn">DEAL</button>
+                <button id="hitBtn" class="casino-btn" disabled>HIT</button>
+                <button id="stayBtn" class="casino-btn" disabled>STAY</button>
+            </div>
+            <div id="blackjackOutput" class="output">Good Luck!</div>
+        </section>
+
+        <section class="game-box">
+            <h2 class="gold">Red Dog</h2>
+            <div id="rd-cards" class="hand">Waiting for bet...</div>
+            <input type="number" id="rdBet" placeholder="Bet $">
+            <button id="rdDealBtn" class="casino-btn">DEAL HAND</button>
+            <div id="rdOutput" class="output">Between the spread wins!</div>
+        </section>
+
+        <section class="game-box">
+            <h2 class="gold">Knockout 52</h2>
+            <div id="ko-card-display" class="ko-card">?</div>
+            <div class="input-row">
+                <select id="koRange">
+                    <option value="13">Cards 1-13 (2x)</option>
+                    <option value="26">Cards 14-26 (3x)</option>
+                    <option value="39">Cards 27-39 (4x)</option>
+                    <option value="52">Cards 40-52 (5x)</option>
+                </select>
+                <input type="number" id="koBet" placeholder="Bet $">
+            </div>
+            <button id="koStartBtn" class="casino-btn">START RACE</button>
+            <div id="koOutput" class="output">Match rank to count!</div>
+        </section>
+
+        <section class="game-box">
+            <h2 class="gold">Crash</h2>
+            <div id="crash-multiplier" style="font-size: 3rem; color: #00ff00; margin: 10px 0;">1.00x</div>
+            <input type="number" id="crashBet" placeholder="Bet $">
+            <div class="input-row">
+                <button id="crashBtn" class="casino-btn">BET</button>
+                <button id="cashOutBtn" class="casino-btn" style="background:#4caf50" disabled>CASH OUT</button>
+            </div>
+            <div id="crashOutput" class="output">Don't get greedy!</div>
+        </section>
+    </main>
+
+    <script src="script.js"></script>
+</body>
+</html>
