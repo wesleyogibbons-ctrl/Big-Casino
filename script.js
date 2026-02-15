@@ -201,21 +201,55 @@ let crashInt, mult = 1.0, cBet = 0;
 document.getElementById("crashBtn").addEventListener("click", function() {
     cBet = parseFloat(document.getElementById("crashBet").value) || 0;
     if (cBet <= 0 || cBet > balance) return alert("Invalid bet!");
-    balance -= cBet; saveState(); this.disabled = true;
+    
+    balance -= cBet; 
+    saveState(); 
+    this.disabled = true;
     document.getElementById("cashOutBtn").disabled = false;
-    mult = 1.0; document.getElementById("crash-multiplier").style.color = "#00ff00";
-    let crashAt = Math.random() * 4 + 1.1;
+    document.getElementById("crashOutput").innerText = "Fly for the moon!";
+    
+    mult = 1.0; 
+    document.getElementById("crash-multiplier").style.color = "#00ff00";
+    document.getElementById("crash-multiplier").innerText = "1.00x";
 
+    // 1. Calculate the crash point
+    let randomNum = Math.random();
+    let crashAt = 0.99 / (1 - randomNum); 
+    if (crashAt > 100) crashAt = 100;
+
+    // 2. 3% House Edge - Force instant crash
+    if (Math.random() < 0.03) crashAt = 1.00;
+
+    // 3. SAFETY CHECK: If crash is 1.00, end game immediately before starting timer
+    if (crashAt <= 1.0) {
+        document.getElementById("crash-multiplier").style.color = "#ff4d4d";
+        document.getElementById("crashOutput").innerText = "INSTANT CRASH!";
+        document.getElementById("cashOutBtn").disabled = true;
+        document.getElementById("crashBtn").disabled = false;
+        saveState(); 
+        checkCollector();
+        return; // This exits the function so the setInterval never starts
+    }
+
+    // 4. Start the game loop
     crashInt = setInterval(() => {
-        mult += 0.02;
+        mult += 0.07;
         document.getElementById("crash-multiplier").innerText = mult.toFixed(2) + "x";
+        
+        // Visual flair: turn gold at 50x
+        if (mult >= 50) {
+            document.getElementById("crash-multiplier").style.color = "#d4af37";
+        }
+
         if (mult >= crashAt) {
             clearInterval(crashInt);
             document.getElementById("crash-multiplier").style.color = "#ff4d4d";
+            document.getElementById("crash-multiplier").innerText = crashAt.toFixed(2) + "x"; // Show exact crash point
             document.getElementById("crashOutput").innerText = "CRASHED!";
             document.getElementById("cashOutBtn").disabled = true;
             document.getElementById("crashBtn").disabled = false;
-            saveState(); checkCollector();
+            saveState(); 
+            checkCollector();
         }
     }, 80);
 });
