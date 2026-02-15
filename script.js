@@ -196,63 +196,107 @@ document.getElementById("koStartBtn").addEventListener("click", async function()
     this.disabled = false; saveState(); checkCollector();
 });
 
-// --- CRASH ---
+// --- CRASH GLOBALS & SLIDER ---
 let crashInt, mult = 1.0, cBet = 0;
+const speedSlider = document.getElementById("speedSlider");
+const speedValue = document.getElementById("speedValue");
+
+speedSlider.addEventListener("input", () => {
+    speedValue.innerText = speedSlider.value + "%";
+});
+
+// --- CRASH MAIN LOGIC ---
 document.getElementById("crashBtn").addEventListener("click", function() {
     cBet = parseFloat(document.getElementById("crashBet").value) || 0;
+    let autoAt = parseFloat(document.getElementById("autoCashout").value) || 0;
+    
     if (cBet <= 0 || cBet > balance) return alert("Invalid bet!");
-    
-    balance -= cBet; 
-    saveState(); 
+
+    // Setup Game State
+    balance -= cBet;
+    saveState();
     this.disabled = true;
+    speedSlider.disabled = true;
     document.getElementById("cashOutBtn").disabled = false;
-    document.getElementById("crashOutput").innerText = "Fly for the moon!";
+    document.getElementById("crashOutput").innerText = "In flight...";
     
-    mult = 1.0; 
+    mult = 1.0;
     document.getElementById("crash-multiplier").style.color = "#00ff00";
     document.getElementById("crash-multiplier").innerText = "1.00x";
 
-    // 1. Calculate the crash point
-    let randomNum = Math.random();
-    let crashAt = 0.98 / (1 - randomNum); 
+    // 1. Calculate Crash Point (Better odds formula: 0.997)
+    let crashAt = 0.997 / (1 - Math.random());
     if (crashAt > 100) crashAt = 100;
 
-    // 2. 3% House Edge - Force instant crash
-    if (Math.random() < 0.03) crashAt = 1.00;
+    // 2. House Edge (1% instant crash)
+    if (Math.random() < 0.01) crashAt = 1.00;
 
-    // 3. SAFETY CHECK: If crash is 1.00, end game immediately before starting timer
+    // 3. Instant Crash Check
     if (crashAt <= 1.0) {
-        document.getElementById("crash-multiplier").style.color = "#ff4d4d";
-        document.getElementById("crashOutput").innerText = "INSTANT CRASH!";
-        document.getElementById("cashOutBtn").disabled = true;
-        document.getElementById("crashBtn").disabled = false;
-        saveState(); 
-        checkCollector();
-        return; // This exits the function so the setInterval never starts
+        endCrash(true, crashAt);
+        return;
     }
 
-    // 4. Start the game loop
+    // 4. Game Loop
+    let userSpeed = parseFloat(speedSlider.value) / 100;
+
     crashInt = setInterval(() => {
-        mult += 0.01+(mult*0.003);
-        document.getElementById("crash-multiplier").innerText = mult.toFixed(2) + "x";
+        // Exponential growth formula
+        let growth = 0.02 + (mult * userSpeed);
+        mult += growth;
         
-        // Visual flair: turn gold at 50x
-        if (mult >= 50) {
-            document.getElementById("crash-multiplier").style.color = "#d4af37";
+        document.getElementById("crash-multiplier").innerText = mult.toFixed(2) + "x";
+
+        // Visual change at high multipliers
+        if (mult >= 50) document.getElementById("crash-multiplier").style.color = "#d4af37";
+
+        // Auto-Cashout Check
+        if (autoAt > 1 && mult >= autoAt) {
+            handleCashOut();
         }
 
+        // Crash Check
         if (mult >= crashAt) {
-            clearInterval(crashInt);
-            document.getElementById("crash-multiplier").style.color = "#ff4d4d";
-            document.getElementById("crash-multiplier").innerText = crashAt.toFixed(2) + "x"; // Show exact crash point
-            document.getElementById("crashOutput").innerText = "CRASHED!";
-            document.getElementById("cashOutBtn").disabled = true;
-            document.getElementById("crashBtn").disabled = false;
-            saveState(); 
-            checkCollector();
+            endCrash(true, crashAt);
         }
-    }, 80);
+    }, 60);
 });
+
+document.getElementById("cashOutBtn").addEventListener("click", handleCashOut);
+
+function handleCashOut() {
+    if (!crashInt) return;
+    clearInterval(crashInt);
+    crashInt = null;
+    
+    let win = cBet * mult;
+    balance += win;
+    
+    document.getElementById("crashOutput").innerText = `Cashed out @ ${mult.toFixed(2)}x! +$${Math.floor(win).toLocaleString()}`;
+    resetCrashUI();
+    saveState();
+}
+
+function endCrash(didCrash, finalVal) {
+    clearInterval(crashInt);
+    crashInt = null;
+    
+    if (didCrash) {
+        document.getElementById("crash-multiplier").style.color = "#ff4d4d";
+        document.getElementById("crash-multiplier").innerText = finalVal.toFixed(2) + "x";
+        document.getElementById("crashOutput").innerText = finalVal <= 1.0 ? "INSTANT CRASH!" : "CRASHED!";
+    }
+    
+    resetCrashUI();
+    saveState();
+    checkCollector();
+}
+
+function resetCrashUI() {
+    document.getElementById("crashBtn").disabled = false;
+    document.getElementById("cashOutBtn").disabled = true;
+    speedSlider.disabled = false;
+}
 
 document.getElementById("cashOutBtn").addEventListener("click", function() {
     clearInterval(crashInt);
