@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><link rel="stylesheet" href="style.css"></head>
+<body data-game="blackjack">
+    <header>
+        <a href="index.html" class="back-btn">⬅ Lobby</a>
+        <div class="status-bar"><span id="balanceDisplay" class="gold"></span></div>
+    </header>
+    <div class="game-container">
+        <h1 class="gold">Blackjack</h1>
+        <div style="font-size: 1.5rem; margin: 20px;">
+            <p>Dealer: <span id="dHand" class="gold">?</span></p>
+            <p>Player: <span id="pHand" class="gold">?</span></p>
+        </div>
+        <input type="number" id="bet" placeholder="Bet Amount">
+        <button id="dealBtn" class="casino-btn">DEAL</button>
+        <div id="controls" style="display:none;">
+            <button id="hitBtn" class="casino-btn">HIT</button>
+            <button id="stayBtn" class="casino-btn">STAY</button>
+        </div>
+        <div id="out" class="output"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
