@@ -215,78 +215,84 @@ if(document.body.getAttribute("data-game") === "reddog") {
     }
 }
 
-// 5. KNOCKOUT (Multi-Tier Upgrade)
-if(document.body.getAttribute("data-game") === "knockout") {
-    document.getElementById("startBtn").onclick = async function() {
-        const tierInputs = [
-            <input type="number" class="tier-bet" id="bet-1" placeholder="Bet $">
-            <input type="number" class="tier-bet" id="bet-2" placeholder="Bet $">
-            <input type="number" class="tier-bet" id="bet-3" placeholder="Bet $">
-            <input type="number" class="tier-bet" id="bet-4" placeholder="Bet $">
-        ];
-
-        let totalBet = tierInputs.reduce((sum, t) => sum + t.bet, 0);
-        
-        if (totalBet <= 0 || totalBet > balance) {
-            alert("Invalid total bet or insufficient funds!");
-            return;
-        }
-
-        // Deduct balance and Lock UI
-        balance -= totalBet;
-        this.disabled = true;
-        document.querySelectorAll(".tier-bet").forEach(i => i.disabled = true);
-        saveState();
-
-        const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
-        let koOccurred = false;
-
-        document.getElementById("out").innerText = "Race in progress...";
-
-        for (let i = 1; i <= 52; i++) {
-            // Determine current tier based on card count
-            let currentTier = Math.ceil(i / 13);
+// --- 5. KNOCKOUT 52 (MULTI-TIER FIXED) ---
+if (document.body.getAttribute("data-game") === "knockout") {
+    const startBtn = document.getElementById("startBtn");
+    
+    if (startBtn) {
+        startBtn.onclick = async function() {
+            // 1. Grab all bets
+            const t1 = parseFloat(document.getElementById("bet-1").value) || 0;
+            const t2 = parseFloat(document.getElementById("bet-2").value) || 0;
+            const t3 = parseFloat(document.getElementById("bet-3").value) || 0;
+            const t4 = parseFloat(document.getElementById("bet-4").value) || 0;
             
-            // Visual feedback: Highlight the active tier box
-            document.querySelectorAll(".ko-tier-box").forEach(b => b.classList.remove("active-tier"));
-            document.getElementById(`tier-${currentTier}`).classList.add("active-tier");
+            const tierBets = [t1, t2, t3, t4];
+            const tierMults = [2.5, 4.0, 6.5, 12.0];
+            const totalBet = t1 + t2 + t3 + t4;
 
-            // Update display
-            let currentRank = ranks[(i - 1) % 13];
-            document.getElementById("cardDisplay").innerText = currentRank;
-            document.getElementById("cardCount").innerText = i;
+            // 2. Validation
+            if (totalBet <= 0) return alert("Place at least one bet!");
+            if (totalBet > balance) return alert("Not enough cash!");
 
-            await new Promise(r => setTimeout(r, 150)); // Slightly slower for tension
+            // 3. Setup Game State
+            balance -= totalBet;
+            startBtn.disabled = true;
+            document.querySelectorAll(".tier-bet").forEach(input => input.disabled = true);
+            document.getElementById("out").style.color = "#00ff00";
+            document.getElementById("out").innerText = "Dealing...";
+            saveState();
 
-            // Check for Knockout (Match rank to index)
-            // Logic: Card 1 is 'A', Card 2 is '2'... Card 14 is 'A' again.
-            if (Math.random() < 0.0769) { // ~1/13 chance
-                koOccurred = true;
-                let activeBet = tierInputs[currentTier - 1];
+            const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+            let isKO = false;
+
+            // 4. The Loop
+            for (let i = 1; i <= 52; i++) {
+                let currentTier = Math.ceil(i / 13); // 1, 2, 3, or 4
+                let rankIndex = (i - 1) % 13;
+                let cardRank = ranks[rankIndex];
+
+                // Update Visuals
+                document.getElementById("cardDisplay").innerText = cardRank;
+                document.getElementById("cardCount").innerText = i;
                 
-                if (activeBet.bet > 0) {
-                    let win = addWin(activeBet.bet * activeBet.mult);
-                    document.getElementById("out").innerText = `KNOCKOUT! Tier ${currentTier} wins $${Math.floor(win)}!`;
-                    document.getElementById("out").style.color = "#00ff00";
-                } else {
-                    document.getElementById("out").innerText = `KO in Tier ${currentTier}, but no bet was placed.`;
-                    document.getElementById("out").style.color = "#ff4d4d";
+                // Highlight active tier
+                document.querySelectorAll(".ko-tier-box").forEach(box => box.classList.remove("active-tier"));
+                const activeBox = document.getElementById(`tier-${currentTier}`);
+                if(activeBox) activeBox.classList.add("active-tier");
+
+                await new Promise(r => setTimeout(r, 120));
+
+                // 5. Check for Knockout (Match)
+                // We use a random chance that mimics the 1/13 probability of a rank match
+                if (Math.random() < 0.0769) { 
+                    isKO = true;
+                    let winningBet = tierBets[currentTier - 1];
+                    
+                    if (winningBet > 0) {
+                        let prize = winningBet * tierMults[currentTier - 1];
+                        let finalPrize = addWin(prize);
+                        document.getElementById("out").innerText = `KO! Tier ${currentTier} pays $${Math.floor(finalPrize).toLocaleString()}`;
+                    } else {
+                        document.getElementById("out").style.color = "#ff4d4d";
+                        document.getElementById("out").innerText = `KO in Tier ${currentTier} (No Bet placed)`;
+                    }
+                    break;
                 }
-                break;
+
+                if (i === 52) {
+                    document.getElementById("out").style.color = "#888";
+                    document.getElementById("out").innerText = "Deck cleared. No Knockout.";
+                }
             }
 
-            if (i === 52) {
-                document.getElementById("out").innerText = "The deck cleared! No knockout.";
-                document.getElementById("out").style.color = "#888";
-            }
-        }
-
-        // Unlock UI
-        this.disabled = false;
-        document.querySelectorAll(".tier-bet").forEach(i => i.disabled = false);
-        document.querySelectorAll(".ko-tier-box").forEach(b => b.classList.remove("active-tier"));
-        saveState();
-    };
+            // 6. Cleanup
+            startBtn.disabled = false;
+            document.querySelectorAll(".tier-bet").forEach(input => input.disabled = false);
+            document.querySelectorAll(".ko-tier-box").forEach(box => box.classList.remove("active-tier"));
+            saveState();
+        };
+    }
 }
 
 // 6. CRASH
