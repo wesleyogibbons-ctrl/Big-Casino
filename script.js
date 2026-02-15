@@ -10,7 +10,7 @@ if (lastVisit !== today) {
     debt += debtInt;
     balance += (interest + 1500);
     localStorage.setItem("lastVisitDate", today);
-    alert(`☀️ New Day!\nGift: +$1,500\nSavings Interest: +$${Math.floor(interest)}\nDebt Interest: -$${Math.floor(debtInt)}`);
+    alert(`The Bank of Wes has Rewarded you!\nGift: +$1,500\nSavings Interest: +$${Math.floor(interest)}\nDebt Interest: -$${Math.floor(debtInt)}`);
     saveState();
 }
 
@@ -233,7 +233,7 @@ document.getElementById("crashBtn").addEventListener("click", function() {
 
     // 4. Start the game loop
     crashInt = setInterval(() => {
-        mult += 0.1+(mult*0.05);
+        mult += 0.06+(mult*0.02);
         document.getElementById("crash-multiplier").innerText = mult.toFixed(2) + "x";
         
         // Visual flair: turn gold at 50x
