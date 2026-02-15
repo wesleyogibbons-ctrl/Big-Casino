@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><link rel="stylesheet" href="style.css"></head>
+<body data-game="reddog">
+    <header>
+        <a href="index.html" class="back-btn">⬅ Lobby</a>
+        <div class="status-bar"><span id="balanceDisplay" class="gold"></span></div>
+    </header>
+    <div class="game-container">
+        <h1 class="gold">Red Dog</h1>
+        <div class="rd-table">
+            <div class="card-slot"><div id="c1" class="card-inner"><div class="card-front">?</div><div class="card-back" id="v1"></div></div></div>
+            <div class="card-slot"><div id="c3" class="card-inner"><div class="card-front">?</div><div class="card-back" id="v3"></div></div></div>
+            <div class="card-slot"><div id="c2" class="card-inner"><div class="card-front">?</div><div class="card-back" id="v2"></div></div></div>
+        </div>
+        <input type="number" id="bet" placeholder="Bet Amount">
+        <button id="dealBtn" class="casino-btn">DEAL</button>
+        <div id="actions" style="display:none;">
+            <button id="raiseBtn" class="casino-btn" style="background:#4caf50">RAISE (2x)</button>
+            <button id="callBtn" class="casino-btn">CALL</button>
+        </div>
+        <div id="out" class="output"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
