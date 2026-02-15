@@ -219,10 +219,10 @@ if(document.body.getAttribute("data-game") === "reddog") {
 if(document.body.getAttribute("data-game") === "knockout") {
     document.getElementById("startBtn").onclick = async function() {
         const tierInputs = [
-            { id: 1, bet: parseFloat(document.getElementById("bet-1").value) || 0, mult: 2.5 },
-            { id: 2, bet: parseFloat(document.getElementById("bet-2").value) || 0, mult: 4.0 },
-            { id: 3, bet: parseFloat(document.getElementById("bet-3").value) || 0, mult: 6.5 },
-            { id: 4, bet: parseFloat(document.getElementById("bet-4").value) || 0, mult: 12.0 }
+            <input type="number" class="tier-bet" id="bet-1" placeholder="Bet $">
+            <input type="number" class="tier-bet" id="bet-2" placeholder="Bet $">
+            <input type="number" class="tier-bet" id="bet-3" placeholder="Bet $">
+            <input type="number" class="tier-bet" id="bet-4" placeholder="Bet $">
         ];
 
         let totalBet = tierInputs.reduce((sum, t) => sum + t.bet, 0);
