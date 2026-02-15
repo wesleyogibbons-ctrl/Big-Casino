@@ -1,0 +1,25 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><link rel="stylesheet" href="style.css"></head>
+<body data-game="crash">
+    <header>
+        <a href="index.html" class="back-btn">⬅ Lobby</a>
+        <div class="status-bar"><span id="balanceDisplay" class="gold"></span></div>
+    </header>
+    <div class="game-container">
+        <h1 class="gold">Crash</h1>
+        <div id="mult" style="font-size: 3rem; color: #00ff00; margin: 20px;">1.00x</div>
+        <div style="display:flex; gap:10px; justify-content:center;">
+            <input type="number" id="bet" placeholder="Bet Amount">
+            <input type="number" id="auto" placeholder="Auto Cashout">
+        </div>
+        <label>Speed: <input type="range" id="spd" min="1" max="10" value="4"></label>
+        <div style="margin-top:10px;">
+            <button id="betBtn" class="casino-btn">BET</button>
+            <button id="cashBtn" class="casino-btn" style="background:#4caf50" disabled>CASHOUT</button>
+        </div>
+        <div id="out" class="output"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
