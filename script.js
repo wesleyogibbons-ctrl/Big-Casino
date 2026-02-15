@@ -134,39 +134,108 @@ function endBj(pay) {
     saveState(); checkCollector();
 }
 
-// --- RED DOG ---
-document.getElementById("rdDealBtn").addEventListener("click", function() {
-    let bet = parseFloat(document.getElementById("rdBet").value) || 0;
-    if (bet <= 0 || bet > balance) return alert("Invalid bet!");
-    balance -= bet; saveState();
-    
-    const draw = () => Math.floor(Math.random() * 13) + 1;
-    let c1 = draw(), c2 = draw(), c3 = draw();
-    const names = {11:"J", 12:"Q", 13:"K", 1:"A"};
-    const getName = (v) => names[v] || v;
+// --- RED DOG GLOBAL STATE ---
+let rdC1, rdC2, rdCurrentBet = 0;
 
-    if (c1 > c2) [c1, c2] = [c2, c1];
-    let spread = c2 - c1 - 1;
-    let output = document.getElementById("rd-cards");
-    
-    if (spread === -1) { // Consecutive
-        balance += bet;
-        output.innerText = `${getName(c1)} & ${getName(c2)}: Consecutive! Push.`;
-    } else if (spread === 0) { // Pair
-        if (c3 === c1) { balance += bet * 12; output.innerText = `Triple ${getName(c3)}! WIN 11:1`; }
-        else { balance += bet; output.innerText = `Pair ${getName(c1)}: Push.`; }
-    } else {
-        output.innerText = `${getName(c1)} & ${getName(c2)} ... Draw: ${getName(c3)}`;
-        if (c3 > c1 && c3 < c2) {
+document.getElementById("rdDealBtn").addEventListener("click", function() {
+    rdCurrentBet = parseFloat(document.getElementById("rdBet").value) || 0;
+    if (rdCurrentBet <= 0 || rdCurrentBet > balance) return alert("Invalid bet!");
+
+    balance -= rdCurrentBet;
+    saveState();
+
+    // Reset Visuals
+    document.querySelectorAll('.card-inner').forEach(c => c.classList.remove('flipped'));
+    document.getElementById("rd-multiplier-tag").innerText = "";
+    document.getElementById("rdOutput").innerText = "Dealing...";
+
+    // Draw first two (Ace = 1, King = 13)
+    rdC1 = Math.floor(Math.random() * 13) + 1;
+    rdC2 = Math.floor(Math.random() * 13) + 1;
+    if (rdC1 > rdC2) [rdC1, rdC2] = [rdC2, rdC1];
+
+    const names = {1:"A", 11:"J", 12:"Q", 13:"K"};
+    document.getElementById("val-1").innerText = names[rdC1] || rdC1;
+    document.getElementById("val-2").innerText = names[rdC2] || rdC2;
+
+    // First Flip Animation
+    setTimeout(() => {
+        document.getElementById("rd-card-1").classList.add("flipped");
+        document.getElementById("rd-card-2").classList.add("flipped");
+        
+        let spread = rdC2 - rdC1 - 1;
+
+        if (spread === -1) { // Consecutive
+            balance += rdCurrentBet;
+            document.getElementById("rdOutput").innerText = "Consecutive! Push.";
+            saveState();
+        } else if (spread === 0) { // Pair
+            document.getElementById("rdOutput").innerText = "Pair! 11:1 if Triple.";
+            document.getElementById("rd-multiplier-tag").innerText = "Triple: 11:1 | Else: Push";
+            showRdActions();
+        } else {
             let mult = spread === 1 ? 5 : (spread === 2 ? 4 : (spread === 3 ? 2 : 1));
-            balance += bet + (bet * mult);
-            document.getElementById("rdOutput").innerText = `WIN! Paid ${mult}:1`;
+            document.getElementById("rd-multiplier-tag").innerText = `Payout: ${mult}:1`;
+            document.getElementById("rdOutput").innerText = `Spread is ${spread}. Raise?`;
+            showRdActions();
+        }
+    }, 400);
+});
+
+function showRdActions() {
+    document.getElementById("rd-action-btns").style.display = "block";
+    document.getElementById("rd-controls").style.display = "none";
+}
+
+document.getElementById("rdRaiseBtn").addEventListener("click", () => {
+    if (balance < rdCurrentBet) return alert("Not enough cash to raise!");
+    balance -= rdCurrentBet;
+    rdCurrentBet *= 2;
+    saveState();
+    revealRdThird();
+});
+
+document.getElementById("rdCallBtn").addEventListener("click", revealRdThird);
+
+function revealRdThird() {
+    // Hide buttons immediately to prevent double-clicking
+    document.getElementById("rd-action-btns").style.display = "none";
+    document.getElementById("rd-controls").style.display = "block";
+    
+    let rdC3 = Math.floor(Math.random() * 13) + 1;
+    const names = {1:"A", 11:"J", 12:"Q", 13:"K"};
+    document.getElementById("val-3").innerText = names[rdC3] || rdC3;
+    
+    // Flip the center card
+    document.getElementById("rd-card-3").classList.add("flipped");
+
+    let spread = rdC2 - rdC1 - 1;
+    let win = 0;
+
+    if (spread === 0) { // Pair logic
+        if (rdC3 === rdC1) win = rdCurrentBet * 12; // 11:1 plus original bet
+        else win = rdCurrentBet; // Push
+    } else {
+        if (rdC3 > rdC1 && rdC3 < rdC2) {
+            let mult = spread === 1 ? 5 : (spread === 2 ? 4 : (spread === 3 ? 2 : 1));
+            win = rdCurrentBet + (rdCurrentBet * mult);
+        }
+    }
+
+    // Delay result display until card finishes flipping
+    setTimeout(() => {
+        if (win > rdCurrentBet) {
+            document.getElementById("rdOutput").innerText = `WIN! +$${win.toLocaleString()}`;
+        } else if (win === rdCurrentBet && spread <= 0) {
+            document.getElementById("rdOutput").innerText = "PUSH (Tie)";
         } else {
             document.getElementById("rdOutput").innerText = "LOST!";
         }
-    }
-    saveState(); checkCollector();
-});
+        balance += win;
+        saveState();
+        checkCollector();
+    }, 600);
+}
 
 // --- KNOCKOUT 52 ---
 document.getElementById("koStartBtn").addEventListener("click", async function() {
