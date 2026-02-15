@@ -92,15 +92,25 @@
         </section>
 
         <section class="game-box">
-            <h2 class="gold">Crash</h2>
-            <div id="crash-multiplier" style="font-size: 3rem; color: #00ff00; margin: 10px 0;">1.00x</div>
+        <h2 class="gold">Crash</h2>
+        <div id="crash-multiplier" style="font-size: 3rem; color: #00ff00; margin: 10px 0;">1.00x</div>
+    
+        <div class="input-row">
             <input type="number" id="crashBet" placeholder="Bet $">
-            <div class="input-row">
-                <button id="crashBtn" class="casino-btn">BET</button>
-                <button id="cashOutBtn" class="casino-btn" style="background:#4caf50" disabled>CASH OUT</button>
-            </div>
-            <div id="crashOutput" class="output">Don't get greedy!</div>
-        </section>
+            <input type="number" id="autoCashout" placeholder="Auto-Cash @ (e.g. 2.5)">
+        </div>
+
+        <div class="slider-container">
+            <label for="speedSlider" class="gold" style="font-size: 0.8rem;">Growth Speed: <span id="speedValue">4%</span></label>
+            <input type="range" id="speedSlider" min="1" max="10" value="4" style="width: 100%;">
+        </div>
+
+        <div class="input-row">
+            <button id="crashBtn" class="casino-btn">PLACE BET</button>
+            <button id="cashOutBtn" class="casino-btn" style="background:#4caf50" disabled>CASH OUT</button>
+        </div>
+        <div id="crashOutput" class="output">Set speed and fly!</div>
+    </section>
     </main>
 
     <script src="script.js"></script>
