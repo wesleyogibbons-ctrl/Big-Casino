@@ -140,9 +140,9 @@ document.getElementById("rdDealBtn").addEventListener("click", function() {
     if (bet <= 0 || bet > balance) return alert("Invalid bet!");
     balance -= bet; saveState();
     
-    const draw = () => Math.floor(Math.random() * 13) + 2;
+    const draw = () => Math.floor(Math.random() * 13) + 1;
     let c1 = draw(), c2 = draw(), c3 = draw();
-    const names = {11:"J", 12:"Q", 13:"K", 14:"A"};
+    const names = {11:"J", 12:"Q", 13:"K", 1:"A"};
     const getName = (v) => names[v] || v;
 
     if (c1 > c2) [c1, c2] = [c2, c1];
