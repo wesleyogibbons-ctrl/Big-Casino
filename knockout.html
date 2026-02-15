@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><link rel="stylesheet" href="style.css"></head>
+<body data-game="knockout">
+    <header>
+        <a href="index.html" class="back-btn">⬅ Lobby</a>
+        <div class="status-bar"><span id="balanceDisplay" class="gold"></span></div>
+    </header>
+    <div class="game-container">
+        <h1 class="gold">Knockout 52</h1>
+        <div id="cardDisplay" style="font-size:3rem; border:2px solid #d4af37; width:60px; margin:20px auto; background:white; color:black;">?</div>
+        <select id="range">
+            <option value="13">Cards 1-13 (2x)</option>
+            <option value="26">Cards 14-26 (3x)</option>
+            <option value="39">Cards 27-39 (4x)</option>
+            <option value="52">Cards 40-52 (5x)</option>
+        </select>
+        <input type="number" id="bet" placeholder="Bet Amount">
+        <button id="startBtn" class="casino-btn">START RACE</button>
+        <div id="out" class="output"></div>
+    </div>
+    <script src="script.js"></script>
+</body>
+</html>
