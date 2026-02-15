@@ -214,7 +214,7 @@ document.getElementById("crashBtn").addEventListener("click", function() {
 
     // 1. Calculate the crash point
     let randomNum = Math.random();
-    let crashAt = 0.99 / (1 - randomNum); 
+    let crashAt = 0.98 / (1 - randomNum); 
     if (crashAt > 100) crashAt = 100;
 
     // 2. 3% House Edge - Force instant crash
@@ -233,7 +233,7 @@ document.getElementById("crashBtn").addEventListener("click", function() {
 
     // 4. Start the game loop
     crashInt = setInterval(() => {
-        mult += 0.5+(mult/4);
+        mult += 0.1+(mult*0.05);
         document.getElementById("crash-multiplier").innerText = mult.toFixed(2) + "x";
         
         // Visual flair: turn gold at 50x
