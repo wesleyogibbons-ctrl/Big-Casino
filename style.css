@@ -29,3 +29,31 @@ input, select { background: #222; color: #fff; border: 1px solid #d4af37; paddin
 .input-row input, .input-row select { width: 42%; }
 .hand { background: #0a2e0a; padding: 10px; margin: 10px 0; border-radius: 10px; border: 1px solid #1a4a1a; min-height: 40px; }
 .output { color: #00ff00; font-weight: bold; min-height: 20px; margin-top: 5px; }
+
+/* --- CRASH GAME UPDATES --- */
+
+.slider-container {
+    margin: 15px 0;
+    padding: 0 10px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+}
+
+#speedSlider {
+    width: 100%;
+    cursor: pointer;
+    accent-color: #d4af37; /* The gold handle */
+    margin-top: 5px;
+}
+
+#autoCashout {
+    border: 1px solid #4caf50; /* A green border to signify "Safety/Cashout" */
+}
+
+#crashOutput {
+    margin-top: 10px;
+    font-size: 0.9rem;
+    min-height: 25px;
+    color: #00ff00;
+}
