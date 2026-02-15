@@ -2,133 +2,64 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wes's Casino</title>
+    <title>Casino Floor</title>
     <link rel="stylesheet" href="style.css">
 </head>
-<body>
+<body id="lobby-container">
     <header>
-        <h1>WES'S CASINO</h1>
-        <div id="status-bar">
-            <h2 id="balance-display">Balance: $20,000</h2>
-            <h2 id="debt-display" style="color: #ff4d4d;">Debt: $0</h2>
+        <div class="logo">Wes's Casino</div>
+        <div class="status-bar">
+            <span id="balanceDisplay" class="gold">$Loading...</span>
+            <span id="debtDisplay" class="red">Debt: $0</span>
+            <span id="prestigeDisplay" class="cyan" style="display:none;"></span>
         </div>
     </header>
 
-    <section class="bank-box">
-        <h2 class="gold">The Bank of Wes</h2>
-        <div class="bank-controls">
-            <p>15% Daily Interest | Collector threshold: $50,000</p>
-            <button id="takeLoanBtn" class="casino-btn">Take $5k Loan</button>
-            <button id="payLoanBtn" class="casino-btn" style="background: #4caf50;">Pay Back $5k</button>
-        </div>
-    </section>
+    <div style="margin: 20px;">
+        <h2 class="gold">Bank of Wes</h2>
+        <button id="takeLoanBtn" class="casino-btn">Borrow $5k</button>
+        <button id="payLoanBtn" class="casino-btn">Repay $5k</button>
+        <br><br>
+        <button id="prestige-btn" class="casino-btn" style="display:none; background: #00ffff;" onclick="doPrestige()">PRESTIGE RESET</button>
+    </div>
 
-    <main class="main-container">
-        <section class="game-box">
-            <h2 class="gold">Slots</h2>
-            <div id="slot-container">
-                <span id="s1">🍒</span><span id="s2">🍒</span><span id="s3">🍒</span>
-            </div>
-            <input type="number" id="slotBet" placeholder="Bet $">
-            <button id="spinSlotsBtn" class="casino-btn">SPIN SLOTS</button>
-            <div id="slotOutput" class="output">Pull the lever!</div>
-        </section>
-
-        <section class="game-box">
-            <h2 class="gold">Roulette</h2>
-            <div id="roulette-wheel">?</div>
-            <div class="input-row">
-                <input type="text" id="numberInput" placeholder="Num (0-36/00)">
-                <input type="number" id="numberBet" placeholder="Bet $">
-            </div>
-            <div class="input-row">
-                <select id="evenInput"><option value="">Even/Odd</option><option value="Even">Even</option><option value="Odd">Odd</option></select>
-                <input type="number" id="evenBet" placeholder="Bet $">
-            </div>
-            <div class="input-row">
-                <select id="colorInput"><option value="">Color</option><option value="Red">Red</option><option value="Black">Black</option></select>
-                <input type="number" id="colorBet" placeholder="Bet $">
-            </div>
-            <button id="spinButton" class="casino-btn">SPIN WHEEL</button>
-            <div id="rouletteOutput" class="output">Place your bets!</div>
-        </section>
-
-        <section class="game-box">
-            <h2 class="gold">Blackjack</h2>
-            <div id="dealer-hand" class="hand">Dealer: Waiting...</div>
-            <div id="player-hand" class="hand">Player: Waiting...</div>
-            <input type="number" id="bjBet" placeholder="Bet $">
-            <div class="bj-btns">
-                <button id="dealBtn" class="casino-btn">DEAL</button>
-                <button id="hitBtn" class="casino-btn" disabled>HIT</button>
-                <button id="stayBtn" class="casino-btn" disabled>STAY</button>
-            </div>
-            <div id="blackjackOutput" class="output">Good Luck!</div>
-        </section>
-
-       <section class="game-box">
-    <h2 class="gold">Red Dog</h2>
-    
-    <div class="rd-table">
-        <div class="card-slot">
-            <div id="rd-card-1" class="card-inner">
-                <div class="card-front">?</div>
-                <div class="card-back" id="val-1"></div>
-            </div>
+    <div class="lobby-grid">
+        <div class="game-card" id="card-slots">
+            <h2>🍒 Slots</h2>
+            <p>Spin to win! The classic.</p>
+            <a href="slots.html" class="casino-btn" style="display:block; margin-top:10px;">PLAY</a>
         </div>
         
-        <div class="card-slot center-card">
-            <div id="rd-card-3" class="card-inner">
-                <div class="card-front">?</div>
-                <div class="card-back" id="val-3"></div>
-            </div>
+        <div class="game-card" id="card-roulette">
+            <h2>🎡 Roulette</h2>
+            <p>Pick a number. 36x Payout.</p>
+            <a href="roulette.html" class="casino-btn" style="display:block; margin-top:10px;">PLAY</a>
         </div>
 
-        <div class="card-slot">
-            <div id="rd-card-2" class="card-inner">
-                <div class="card-front">?</div>
-                <div class="card-back" id="val-2"></div>
-            </div>
+        <div class="game-card" id="card-blackjack">
+            <h2>🃏 Blackjack</h2>
+            <p>Beat the dealer to 21.</p>
+            <a href="blackjack.html" class="casino-btn" style="display:block; margin-top:10px;">PLAY</a>
+        </div>
+
+        <div class="game-card" id="card-reddog">
+            <h2>🐕 Red Dog</h2>
+            <p>Bet on the spread.</p>
+            <a href="reddog.html" class="casino-btn" style="display:block; margin-top:10px;">PLAY</a>
+        </div>
+
+        <div class="game-card" id="card-knockout">
+            <h2>🥊 Knockout 52</h2>
+            <p>Survive the deck.</p>
+            <a href="knockout.html" class="casino-btn" style="display:block; margin-top:10px;">PLAY</a>
+        </div>
+
+        <div class="game-card" id="card-crash">
+            <h2>🚀 Crash</h2>
+            <p>Market crash simulation.</p>
+            <a href="crash.html" class="casino-btn" style="display:block; margin-top:10px;">PLAY</a>
         </div>
     </div>
-
-    <div id="rd-multiplier-tag" class="gold" style="height: 20px; margin: 10px 0; font-size: 0.9rem;"></div>
-    
-    <div id="rd-controls">
-        <input type="number" id="rdBet" placeholder="Bet $">
-        <button id="rdDealBtn" class="casino-btn">DEAL</button>
-    </div>
-
-    <div id="rd-action-btns" style="display: none;">
-        <button id="rdRaiseBtn" class="casino-btn" style="background: #4caf50;">RAISE (2x) & DRAW</button>
-        <button id="rdCallBtn" class="casino-btn">STAND & DRAW</button>
-    </div>
-    
-    <div id="rdOutput" class="output">Place your bet!</div>
-</section>
-
-        <section class="game-box">
-        <h2 class="gold">Crash</h2>
-        <div id="crash-multiplier" style="font-size: 3rem; color: #00ff00; margin: 10px 0;">1.00x</div>
-    
-        <div class="input-row">
-            <input type="number" id="crashBet" placeholder="Bet $">
-            <input type="number" id="autoCashout" placeholder="Auto-Cash @ (e.g. 2.5)">
-        </div>
-
-        <div class="slider-container">
-            <label for="speedSlider" class="gold" style="font-size: 0.8rem;">Growth Speed: <span id="speedValue">4%</span></label>
-            <input type="range" id="speedSlider" min="1" max="10" value="4" style="width: 100%;">
-        </div>
-
-        <div class="input-row">
-            <button id="crashBtn" class="casino-btn">PLACE BET</button>
-            <button id="cashOutBtn" class="casino-btn" style="background:#4caf50" disabled>CASH OUT</button>
-        </div>
-        <div id="crashOutput" class="output">Set speed and fly!</div>
-    </section>
-    </main>
 
     <script src="script.js"></script>
 </body>
