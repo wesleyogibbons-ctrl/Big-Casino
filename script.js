@@ -233,7 +233,7 @@ document.getElementById("crashBtn").addEventListener("click", function() {
 
     // 4. Start the game loop
     crashInt = setInterval(() => {
-        mult += 0.07;
+        mult += 0.5+(mult/4);
         document.getElementById("crash-multiplier").innerText = mult.toFixed(2) + "x";
         
         // Visual flair: turn gold at 50x
