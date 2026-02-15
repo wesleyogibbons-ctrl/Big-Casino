@@ -1,0 +1,31 @@
+body { background-color: #051a05; color: white; font-family: 'Arial Black', sans-serif; text-align: center; margin: 0; }
+header { background: #000; padding: 20px; border-bottom: 4px solid #d4af37; box-shadow: 0 4px 10px rgba(0,0,0,0.5); }
+#status-bar { display: flex; justify-content: center; gap: 40px; }
+.gold { color: #d4af37; text-shadow: 1px 1px 2px #000; }
+.main-container { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; padding: 20px; }
+.game-box, .bank-box { background: #111; border: 2px solid #d4af37; border-radius: 15px; padding: 20px; box-shadow: 0 0 15px rgba(212, 175, 55, 0.3); }
+.game-box { width: 350px; display: flex; flex-direction: column; justify-content: space-between; }
+.bank-box { width: 90%; max-width: 800px; margin: 20px auto; }
+
+/* ANIMATIONS & DISPLAYS */
+#slot-container { font-size: 3rem; background: #000; height: 60px; display: flex; justify-content: center; align-items: center; border-radius: 10px; border: 2px inset #333; margin-bottom: 10px; }
+.spinning { animation: blur 0.1s infinite; }
+@keyframes blur { 0% { filter: blur(0px); } 50% { filter: blur(4px); transform: translateY(-2px); } 100% { filter: blur(0px); } }
+
+#roulette-wheel { width: 80px; height: 80px; background: #000; border: 5px solid #d4af37; border-radius: 50%; margin: 0 auto 15px; line-height: 80px; font-size: 1.5rem; transition: 0.3s; }
+.wheel-spin { animation: pulse-gold 0.5s infinite; }
+@keyframes pulse-gold { 0% { box-shadow: 0 0 0px #d4af37; } 50% { box-shadow: 0 0 25px #d4af37; } 100% { box-shadow: 0 0 0px #d4af37; } }
+
+/* NEW GAME SPECIFIC CSS */
+.ko-card { width: 60px; height: 80px; background: white; color: black; margin: 0 auto 10px; line-height: 80px; font-size: 2rem; border-radius: 8px; font-family: serif; }
+#crash-multiplier { font-family: monospace; text-shadow: 0 0 10px #00ff00; }
+
+/* BUTTONS & INPUTS */
+.casino-btn { background: linear-gradient(#d4af37, #b8860b); color: #000; border: none; padding: 10px 15px; font-weight: bold; cursor: pointer; border-radius: 5px; margin: 5px; transition: 0.2s; }
+.casino-btn:hover:not(:disabled) { transform: scale(1.05); filter: brightness(1.2); }
+.casino-btn:disabled { background: #444; color: #888; cursor: not-allowed; }
+input, select { background: #222; color: #fff; border: 1px solid #d4af37; padding: 8px; border-radius: 4px; margin: 5px; width: 85%; align-self: center; }
+.input-row { display: flex; justify-content: center; gap: 5px; width: 100%; }
+.input-row input, .input-row select { width: 42%; }
+.hand { background: #0a2e0a; padding: 10px; margin: 10px 0; border-radius: 10px; border: 1px solid #1a4a1a; min-height: 40px; }
+.output { color: #00ff00; font-weight: bold; min-height: 20px; margin-top: 5px; }
