@@ -1,379 +1,268 @@
-// --- INITIAL DATA & ECONOMY ---
-let balance = parseFloat(localStorage.getItem("casinoBalance")) || 20000;
+// --- GLOBAL ECONOMY & STATE ---
+let balance = parseFloat(localStorage.getItem("casinoBalance")) || 2000;
 let debt = parseFloat(localStorage.getItem("casinoDebt")) || 0;
-let lastVisit = localStorage.getItem("lastVisitDate");
-let today = new Date().toDateString();
+let unlocked = JSON.parse(localStorage.getItem("unlockedGames")) || ["slots"];
+let prestige = parseInt(localStorage.getItem("prestigeLevel")) || 0;
+let multiplier = 1 + (prestige * 0.5); // 50% bonus per prestige
 
-if (lastVisit !== today) {
-    const interest = balance > 0 ? balance * 0.10 : 0;
-    const debtInt = debt * 0.15;
-    debt += debtInt;
-    balance += (interest + 1500);
-    localStorage.setItem("lastVisitDate", today);
-    alert(`The Bank of Wes has Rewarded you!\nGift: +$1,500\nSavings Interest: +$${Math.floor(interest)}\nDebt Interest: -$${Math.floor(debtInt)}`);
-    saveState();
+// Update Header on Load
+document.addEventListener("DOMContentLoaded", () => {
+    updateHUD();
+    
+    // Check if on Lobby
+    if(document.getElementById("lobby-container")) initLobby();
+    
+    // Check if on a Game Page (and if unlocked)
+    let page = document.body.getAttribute("data-game");
+    if(page && !unlocked.includes(page)) {
+        alert("This game is locked!");
+        window.location.href = "index.html";
+    }
+});
+
+function updateHUD() {
+    let balEl = document.getElementById("balanceDisplay");
+    let debtEl = document.getElementById("debtDisplay");
+    if(balEl) balEl.innerText = "$" + Math.floor(balance).toLocaleString();
+    if(debtEl) debtEl.innerText = "Debt: $" + Math.floor(debt).toLocaleString();
+    
+    // Prestige Display
+    let prestEl = document.getElementById("prestigeDisplay");
+    if(prestEl && prestige > 0) {
+        prestEl.innerText = `⭐ Prestige ${prestige} (${multiplier}x)`;
+        prestEl.style.display = "block";
+    }
 }
 
 function saveState() {
     localStorage.setItem("casinoBalance", balance);
     localStorage.setItem("casinoDebt", debt);
-    document.getElementById("balance-display").innerText = "Balance: $" + Math.floor(balance).toLocaleString();
-    document.getElementById("debt-display").innerText = "Debt: $" + Math.floor(debt).toLocaleString();
-    document.getElementById("balance-display").style.color = balance < 0 ? "#ff4d4d" : "#00ff00";
+    localStorage.setItem("unlockedGames", JSON.stringify(unlocked));
+    updateHUD();
 }
 
-function checkCollector() {
-    if (debt >= 50000 && Math.random() < 0.10) {
-        const take = Math.floor(balance * 0.5);
-        if (take > 0) {
-            balance -= take;
-            debt -= take;
-            alert(`⚠️ DEBT COLLECTOR! ⚠️\nWes's goons took 50% ($${take.toLocaleString()}) of your balance.`);
-            saveState();
-        }
-    }
-}
-
-// --- BANKING ---
-document.getElementById("takeLoanBtn").addEventListener("click", () => {
-    if (debt >= 100000) return alert("Wes: You're too high-risk!");
-    balance += 5000; debt += 5000; saveState();
-});
-document.getElementById("payLoanBtn").addEventListener("click", () => {
-    if (debt <= 0) return alert("No debt!");
-    if (balance < 5000) return alert("Need $5k!");
-    balance -= 5000; debt -= 5000; saveState();
-});
-
-// --- SLOTS ---
-const symbols = ["🍒", "🍋", "🔔", "💎", "7️⃣"];
-document.getElementById("spinSlotsBtn").addEventListener("click", function() {
-    const bet = parseFloat(document.getElementById("slotBet").value) || 0;
-    if (bet <= 0 || bet > balance) return alert("Invalid bet!");
-    balance -= bet; saveState(); this.disabled = true;
-    const sEls = [document.getElementById("s1"), document.getElementById("s2"), document.getElementById("s3")];
-    sEls.forEach(el => el.classList.add("spinning"));
-
-    setTimeout(() => {
-        sEls.forEach(el => el.classList.remove("spinning"));
-        const res = [symbols[Math.floor(Math.random()*5)], symbols[Math.floor(Math.random()*5)], symbols[Math.floor(Math.random()*5)]];
-        sEls.forEach((el, i) => el.innerText = res[i]);
-        let win = 0;
-        if (res[0] === res[1] && res[1] === res[2]) win = res[0] === "7️⃣" ? bet * 50 : bet * 15;
-        else if (res[0] === res[1] || res[1] === res[2] || res[0] === res[2]) win = bet * 2;
-        balance += win; document.getElementById("slotOutput").innerText = win > 0 ? `WIN $${win}!` : "LOSE";
-        this.disabled = false; saveState(); checkCollector();
-    }, 1200);
-});
-
-// --- ROULETTE ---
-document.getElementById("spinButton").addEventListener("click", function() {
-    const nBet = parseFloat(document.getElementById("numberBet").value) || 0;
-    const eoBet = parseFloat(document.getElementById("evenBet").value) || 0;
-    const cBet = parseFloat(document.getElementById("colorBet").value) || 0;
-    const total = nBet + eoBet + cBet;
-    if (total <= 0 || total > balance) return alert("Invalid bet!");
-    balance -= total; saveState(); this.disabled = true;
-    const wheel = document.getElementById("roulette-wheel"); wheel.classList.add("wheel-spin");
-
-    setTimeout(() => {
-        wheel.classList.remove("wheel-spin");
-        const res = Math.floor(Math.random() * 38);
-        const reds = [1,3,5,7,9,12,14,16,18,19,21,23,25,27,30,32,34,36];
-        let color = (res === 0 || res === 37) ? "Green" : (reds.includes(res) ? "Red" : "Black");
-        wheel.innerText = res === 37 ? "00" : res;
-        wheel.style.borderColor = color === "Red" ? "#ff4d4d" : (color === "Black" ? "#fff" : "#00ff00");
-        let win = 0;
-        if ((document.getElementById("numberInput").value === "00" && res === 37) || parseInt(document.getElementById("numberInput").value) === res) win += nBet * 36;
-        if (res !== 0 && res !== 37) {
-            let choice = document.getElementById("evenInput").value;
-            if (((res % 2 === 0) && choice === "Even") || ((res % 2 !== 0) && choice === "Odd")) win += eoBet * 2;
-            if (document.getElementById("colorInput").value === color) win += cBet * 2;
-        }
-        balance += win; document.getElementById("rouletteOutput").innerText = `Landed ${color} ${res === 37 ? '00' : res}!`;
-        this.disabled = false; saveState(); checkCollector();
-    }, 1500);
-});
-
-// --- BLACKJACK ---
-let deck = [], pHand = [], dHand = [], bjBet = 0;
-function createDeck() {
-    const suits = ["♠", "♥", "♦", "♣"], vals = [{n:"A", v:11}, {n:"2", v:2}, {n:"3", v:3}, {n:"4", v:4}, {n:"5", v:5}, {n:"6", v:6}, {n:"7", v:7}, {n:"8", v:8}, {n:"9", v:9}, {n:"10", v:10}, {n:"J", v:10}, {n:"Q", v:10}, {n:"K", v:10}];
-    deck = []; for (let s of suits) for (let v of vals) deck.push({ name: v.n + s, value: v.v });
-    deck.sort(() => Math.random() - 0.5);
-}
-function getScore(hand) {
-    let s = 0, a = 0; for (let c of hand) { s += c.value; if(c.name.includes("A")) a++; }
-    while (s > 21 && a > 0) { s -= 10; a--; } return s;
-}
-document.getElementById("dealBtn").addEventListener("click", () => {
-    bjBet = parseFloat(document.getElementById("bjBet").value) || 0;
-    if (bjBet <= 0 || bjBet > balance) return alert("Invalid bet!");
-    balance -= bjBet; createDeck();
-    pHand = [deck.pop(), deck.pop()]; dHand = [deck.pop(), deck.pop()];
-    updateBjUI(false); document.getElementById("dealBtn").disabled = true;
-    document.getElementById("hitBtn").disabled = false; document.getElementById("stayBtn").disabled = false;
-    document.getElementById("blackjackOutput").innerText = "Hit or Stay?"; saveState();
-});
-document.getElementById("hitBtn").addEventListener("click", () => {
-    pHand.push(deck.pop()); updateBjUI(false);
-    if (getScore(pHand) > 21) { document.getElementById("blackjackOutput").innerText = "Bust!"; endBj(0); }
-});
-document.getElementById("stayBtn").addEventListener("click", () => {
-    while (getScore(dHand) < 17) dHand.push(deck.pop()); updateBjUI(true);
-    let pS = getScore(pHand), dS = getScore(dHand);
-    if (dS > 21 || pS > dS) endBj(bjBet * 2); else if (pS === dS) endBj(bjBet); else endBj(0);
-});
-function updateBjUI(show) {
-    document.getElementById("player-hand").innerText = "Player: " + pHand.map(c=>c.name).join(", ") + " ("+getScore(pHand)+")";
-    document.getElementById("dealer-hand").innerText = "Dealer: " + (show ? dHand.map(c=>c.name).join(", ") + " ("+getScore(dHand)+")" : dHand[0].name + ", [Hidden]");
-}
-function endBj(pay) {
-    balance += pay; document.getElementById("blackjackOutput").innerText = pay > bjBet ? "Win!" : (pay === bjBet ? "Push" : "Loss");
-    document.getElementById("dealBtn").disabled = false; document.getElementById("hitBtn").disabled = true; document.getElementById("stayBtn").disabled = true;
-    saveState(); checkCollector();
-}
-
-// --- RED DOG GLOBAL STATE ---
-let rdC1, rdC2, rdCurrentBet = 0;
-
-document.getElementById("rdDealBtn").addEventListener("click", function() {
-    rdCurrentBet = parseFloat(document.getElementById("rdBet").value) || 0;
-    if (rdCurrentBet <= 0 || rdCurrentBet > balance) return alert("Invalid bet!");
-
-    balance -= rdCurrentBet;
+function addWin(amount) {
+    let finalWin = amount * multiplier;
+    balance += finalWin;
     saveState();
-
-    // Reset Visuals
-    document.querySelectorAll('.card-inner').forEach(c => c.classList.remove('flipped'));
-    document.getElementById("rd-multiplier-tag").innerText = "";
-    document.getElementById("rdOutput").innerText = "Dealing...";
-
-    // Draw first two (Ace = 1, King = 13)
-    rdC1 = Math.floor(Math.random() * 13) + 1;
-    rdC2 = Math.floor(Math.random() * 13) + 1;
-    if (rdC1 > rdC2) [rdC1, rdC2] = [rdC2, rdC1];
-
-    const names = {1:"A", 11:"J", 12:"Q", 13:"K"};
-    document.getElementById("val-1").innerText = names[rdC1] || rdC1;
-    document.getElementById("val-2").innerText = names[rdC2] || rdC2;
-
-    // First Flip Animation
-    setTimeout(() => {
-        document.getElementById("rd-card-1").classList.add("flipped");
-        document.getElementById("rd-card-2").classList.add("flipped");
-        
-        let spread = rdC2 - rdC1 - 1;
-
-        if (spread === -1) { // Consecutive
-            balance += rdCurrentBet;
-            document.getElementById("rdOutput").innerText = "Consecutive! Push.";
-            saveState();
-        } else if (spread === 0) { // Pair
-            document.getElementById("rdOutput").innerText = "Pair! 11:1 if Triple.";
-            document.getElementById("rd-multiplier-tag").innerText = "Triple: 11:1 | Else: Push";
-            showRdActions();
-        } else {
-            let mult = spread === 1 ? 5 : (spread === 2 ? 4 : (spread === 3 ? 2 : 1));
-            document.getElementById("rd-multiplier-tag").innerText = `Payout: ${mult}:1`;
-            document.getElementById("rdOutput").innerText = `Spread is ${spread}. Raise?`;
-            showRdActions();
-        }
-    }, 400);
-});
-
-function showRdActions() {
-    document.getElementById("rd-action-btns").style.display = "block";
-    document.getElementById("rd-controls").style.display = "none";
+    return finalWin;
 }
 
-document.getElementById("rdRaiseBtn").addEventListener("click", () => {
-    if (balance < rdCurrentBet) return alert("Not enough cash to raise!");
-    balance -= rdCurrentBet;
-    rdCurrentBet *= 2;
-    saveState();
-    revealRdThird();
-});
-
-document.getElementById("rdCallBtn").addEventListener("click", revealRdThird);
-
-function revealRdThird() {
-    // Hide buttons immediately to prevent double-clicking
-    document.getElementById("rd-action-btns").style.display = "none";
-    document.getElementById("rd-controls").style.display = "block";
+// --- LOBBY LOGIC ---
+function initLobby() {
+    // Game Costs
+    const costs = { "roulette": 5000, "blackjack": 20000, "reddog": 50000, "knockout": 100000, "crash": 500000 };
     
-    let rdC3 = Math.floor(Math.random() * 13) + 1;
-    const names = {1:"A", 11:"J", 12:"Q", 13:"K"};
-    document.getElementById("val-3").innerText = names[rdC3] || rdC3;
-    
-    // Flip the center card
-    document.getElementById("rd-card-3").classList.add("flipped");
-
-    let spread = rdC2 - rdC1 - 1;
-    let win = 0;
-
-    if (spread === 0) { // Pair logic
-        if (rdC3 === rdC1) win = rdCurrentBet * 12; // 11:1 plus original bet
-        else win = rdCurrentBet; // Push
-    } else {
-        if (rdC3 > rdC1 && rdC3 < rdC2) {
-            let mult = spread === 1 ? 5 : (spread === 2 ? 4 : (spread === 3 ? 2 : 1));
-            win = rdCurrentBet + (rdCurrentBet * mult);
+    for (let [game, cost] of Object.entries(costs)) {
+        if (!unlocked.includes(game)) {
+            let card = document.getElementById(`card-${game}`);
+            let link = card.querySelector("a");
+            
+            // Disable Link
+            link.href = "#";
+            card.classList.add("locked");
+            
+            // Create Unlock Overlay
+            let overlay = document.createElement("div");
+            overlay.className = "unlock-overlay";
+            overlay.innerHTML = `<div style="font-size:2rem;">🔒</div><button class="unlock-btn" onclick="unlockGame('${game}', ${cost})">Unlock: $${cost.toLocaleString()}</button>`;
+            card.appendChild(overlay);
         }
     }
 
-    // Delay result display until card finishes flipping
-    setTimeout(() => {
-        if (win > rdCurrentBet) {
-            document.getElementById("rdOutput").innerText = `WIN! +$${win.toLocaleString()}`;
-        } else if (win === rdCurrentBet && spread <= 0) {
-            document.getElementById("rdOutput").innerText = "PUSH (Tie)";
-        } else {
-            document.getElementById("rdOutput").innerText = "LOST!";
-        }
-        balance += win;
+    // Prestige Button
+    if(balance >= 20000000) {
+        document.getElementById("prestige-btn").style.display = "block";
+    }
+}
+
+window.unlockGame = function(game, cost) {
+    if(balance >= cost) {
+        balance -= cost;
+        unlocked.push(game);
         saveState();
-        checkCollector();
-    }, 600);
+        location.reload();
+    } else {
+        alert("Not enough cash!");
+    }
+};
+
+window.doPrestige = function() {
+    if(!confirm("Reset progress for +50% permanent multiplier?")) return;
+    localStorage.setItem("prestigeLevel", prestige + 1);
+    localStorage.setItem("casinoBalance", 2000);
+    localStorage.setItem("casinoDebt", 0);
+    localStorage.setItem("unlockedGames", JSON.stringify(["slots"]));
+    location.reload();
+};
+
+// --- BANK LOGIC ---
+if(document.getElementById("takeLoanBtn")) {
+    document.getElementById("takeLoanBtn").onclick = () => { balance += 5000; debt += 5000; saveState(); };
+    document.getElementById("payLoanBtn").onclick = () => { if(balance >= 5000 && debt > 0) { balance -= 5000; debt -= 5000; saveState(); }};
 }
 
-// --- KNOCKOUT 52 ---
-document.getElementById("koStartBtn").addEventListener("click", async function() {
-    let bet = parseFloat(document.getElementById("koBet").value) || 0;
-    let range = parseInt(document.getElementById("koRange").value);
-    if (bet <= 0 || bet > balance) return alert("Invalid bet!");
+// --- GAME ENGINES ---
 
-    balance -= bet; this.disabled = true; saveState();
-    let ranks = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
-    let win = false;
+// 1. SLOTS
+if(document.body.getAttribute("data-game") === "slots") {
+    const s = ["🍒","🍋","7️⃣","💎","🔔"];
+    document.getElementById("spinBtn").onclick = () => {
+        let bet = parseFloat(document.getElementById("bet").value);
+        if(!bet || bet>balance) return;
+        balance -= bet; saveState();
+        let els = [1,2,3].map(i=>document.getElementById("s"+i));
+        els.forEach(e => e.innerText = "🌀");
+        setTimeout(() => {
+            let res = els.map(e => { let v = s[Math.floor(Math.random()*5)]; e.innerText = v; return v; });
+            let win = 0;
+            if(res[0]===res[1] && res[1]===res[2]) win = res[0]==="7️⃣" ? bet*50 : bet*15;
+            else if(res[0]===res[1] || res[0]===res[2] || res[1]===res[2]) win = bet*2;
+            let final = addWin(win);
+            document.getElementById("out").innerText = win > 0 ? `WIN: $${Math.floor(final)}` : "LOST";
+        }, 500);
+    };
+}
 
-    for (let i = 1500; i <= 52; i++) {
-        let card = ranks[(i-1) % 13];
-        document.getElementById("ko-card-display").innerText = card;
-        await new Promise(r => setTimeout(r, 100));
+// 2. ROULETTE
+if(document.body.getAttribute("data-game") === "roulette") {
+    document.getElementById("spinBtn").onclick = () => {
+        let bet = parseFloat(document.getElementById("bet").value);
+        let pick = parseInt(document.getElementById("pick").value);
+        if(!bet || bet>balance || isNaN(pick)) return;
+        balance -= bet; saveState();
+        let land = Math.floor(Math.random()*37);
+        document.getElementById("wheel").innerText = land;
+        if(land === pick) {
+            let w = addWin(bet*36);
+            document.getElementById("out").innerText = `JACKPOT! +$${Math.floor(w)}`;
+        } else {
+            document.getElementById("out").innerText = `Landed ${land}. Lost.`;
+        }
+    };
+}
 
-        if (Math.random() < 0.076) { 
-            document.getElementById("koOutput").innerText = `KO at card ${i}!`;
-            if (i <= range && i > (range - 13)) {
-                let mults = {13: 2, 26: 3, 39: 4, 52: 5};
-                balance += bet * mults[range]; win = true;
+// 3. BLACKJACK
+if(document.body.getAttribute("data-game") === "blackjack") {
+    let deck=[], p=[], d=[], b=0;
+    document.getElementById("dealBtn").onclick = () => {
+        b = parseFloat(document.getElementById("bet").value);
+        if(!b || b>balance) return;
+        balance -= b; saveState();
+        deck=[2,3,4,5,6,7,8,9,10,10,10,10,11].flatMap(v=>[v,v,v,v]).sort(()=>Math.random()-.5);
+        p=[deck.pop(),deck.pop()]; d=[deck.pop(),deck.pop()];
+        document.getElementById("pHand").innerText = p.reduce((x,y)=>x+y);
+        document.getElementById("dHand").innerText = d[0] + ", ?";
+        document.getElementById("controls").style.display = "block";
+        document.getElementById("dealBtn").style.display = "none";
+        document.getElementById("out").innerText = "Hit or Stay?";
+    };
+    document.getElementById("hitBtn").onclick = () => {
+        p.push(deck.pop());
+        let sum = p.reduce((x,y)=>x+y);
+        document.getElementById("pHand").innerText = sum;
+        if(sum > 21) endBJ(0, "Bust!");
+    };
+    document.getElementById("stayBtn").onclick = () => {
+        while(d.reduce((x,y)=>x+y) < 17) d.push(deck.pop());
+        let pS = p.reduce((x,y)=>x+y), dS = d.reduce((x,y)=>x+y);
+        if(dS > 21 || pS > dS) endBJ(b*2, "You Win!");
+        else if(pS === dS) endBJ(b, "Push");
+        else endBJ(0, "Dealer Wins");
+    };
+    function endBJ(w, m) {
+        if(w>0) addWin(w); // Refund logic handled in addWin 
+        document.getElementById("out").innerText = m;
+        document.getElementById("controls").style.display = "none";
+        document.getElementById("dealBtn").style.display = "inline";
+    }
+}
+
+// 4. RED DOG
+if(document.body.getAttribute("data-game") === "reddog") {
+    let c1, c2, bet=0;
+    document.getElementById("dealBtn").onclick = () => {
+        bet = parseFloat(document.getElementById("bet").value);
+        if(!bet || bet>balance) return;
+        balance -= bet; saveState();
+        document.querySelectorAll(".card-inner").forEach(c=>c.classList.remove("flipped"));
+        c1=Math.floor(Math.random()*13)+1; c2=Math.floor(Math.random()*13)+1;
+        if(c1>c2) [c1,c2]=[c2,c1];
+        document.getElementById("v1").innerText = c1===1?"A":c1; document.getElementById("v2").innerText = c2===1?"A":c2;
+        setTimeout(()=>{
+            document.getElementById("c1").classList.add("flipped");
+            document.getElementById("c2").classList.add("flipped");
+            let spr = c2-c1-1;
+            if(spr===-1) { addWin(bet); document.getElementById("out").innerText="Push"; }
+            else {
+                document.getElementById("actions").style.display="block";
+                document.getElementById("dealBtn").style.display="none";
+                document.getElementById("out").innerText = `Spread: ${spr}`;
             }
-            break;
-        }
-        if (i === 52) document.getElementById("koOutput").innerText = "No Knockout!";
+        },300);
+    };
+    document.getElementById("raiseBtn").onclick = () => { if(balance>=bet){balance-=bet; bet*=2; saveState(); finRD();} };
+    document.getElementById("callBtn").onclick = () => finRD();
+    function finRD() {
+        document.getElementById("actions").style.display="none"; document.getElementById("dealBtn").style.display="inline";
+        let c3 = Math.floor(Math.random()*13)+1;
+        document.getElementById("v3").innerText = c3===1?"A":c3;
+        document.getElementById("c3").classList.add("flipped");
+        let spr=c2-c1-1, w=0;
+        if(c3>c1 && c3<c2) w = bet * (spr==1?5 : spr==2?4 : spr==3?2 : 1) + bet;
+        else if(spr==0 && c3==c1) w = bet*12;
+        setTimeout(()=>{ if(w>0) addWin(w); document.getElementById("out").innerText=w>0?`WIN $${w}`:"LOSS"; }, 500);
     }
-    this.disabled = false; saveState(); checkCollector();
-});
-
-// --- CRASH GLOBALS & SLIDER ---
-let crashInt, mult = 1.0, cBet = 0;
-const speedSlider = document.getElementById("speedSlider");
-const speedValue = document.getElementById("speedValue");
-
-speedSlider.addEventListener("input", () => {
-    speedValue.innerText = speedSlider.value + "%";
-});
-
-// --- CRASH MAIN LOGIC ---
-document.getElementById("crashBtn").addEventListener("click", function() {
-    cBet = parseFloat(document.getElementById("crashBet").value) || 0;
-    let autoAt = parseFloat(document.getElementById("autoCashout").value) || 0;
-    
-    if (cBet <= 0 || cBet > balance) return alert("Invalid bet!");
-
-    // Setup Game State
-    balance -= cBet;
-    saveState();
-    this.disabled = true;
-    speedSlider.disabled = true;
-    document.getElementById("cashOutBtn").disabled = false;
-    document.getElementById("crashOutput").innerText = "In flight...";
-    
-    mult = 1.0;
-    document.getElementById("crash-multiplier").style.color = "#00ff00";
-    document.getElementById("crash-multiplier").innerText = "1.00x";
-
-    // 1. Calculate Crash Point (Better odds formula: 0.997)
-    let crashAt = 0.997 / (1 - Math.random());
-    if (crashAt > 100) crashAt = 100;
-
-    // 2. House Edge (1% instant crash)
-    if (Math.random() < 0.01) crashAt = 1.00;
-
-    // 3. Instant Crash Check
-    if (crashAt <= 1.0) {
-        endCrash(true, crashAt);
-        return;
-    }
-
-    // 4. Game Loop
-    let userSpeed = parseFloat(speedSlider.value) / 100;
-
-    crashInt = setInterval(() => {
-        // Exponential growth formula
-        let growth = 0.02 + (mult * userSpeed);
-        mult += growth;
-        
-        document.getElementById("crash-multiplier").innerText = mult.toFixed(2) + "x";
-
-        // Visual change at high multipliers
-        if (mult >= 50) document.getElementById("crash-multiplier").style.color = "#d4af37";
-
-        // Auto-Cashout Check
-        if (autoAt > 1 && mult >= autoAt) {
-            handleCashOut();
-        }
-
-        // Crash Check
-        if (mult >= crashAt) {
-            endCrash(true, crashAt);
-        }
-    }, 60);
-});
-
-document.getElementById("cashOutBtn").addEventListener("click", handleCashOut);
-
-function handleCashOut() {
-    if (!crashInt) return;
-    clearInterval(crashInt);
-    crashInt = null;
-    
-    let win = cBet * mult;
-    balance += win;
-    
-    document.getElementById("crashOutput").innerText = `Cashed out @ ${mult.toFixed(2)}x! +$${Math.floor(win).toLocaleString()}`;
-    resetCrashUI();
-    saveState();
 }
 
-function endCrash(didCrash, finalVal) {
-    clearInterval(crashInt);
-    crashInt = null;
-    
-    if (didCrash) {
-        document.getElementById("crash-multiplier").style.color = "#ff4d4d";
-        document.getElementById("crash-multiplier").innerText = finalVal.toFixed(2) + "x";
-        document.getElementById("crashOutput").innerText = finalVal <= 1.0 ? "INSTANT CRASH!" : "CRASHED!";
+// 5. KNOCKOUT
+if(document.body.getAttribute("data-game") === "knockout") {
+    document.getElementById("startBtn").onclick = async function() {
+        let bet = parseFloat(document.getElementById("bet").value);
+        let rng = parseInt(document.getElementById("range").value);
+        if(!bet || bet>balance) return;
+        balance -= bet; this.disabled=true; saveState();
+        for(let i=1; i<=52; i++) {
+            document.getElementById("cardDisplay").innerText = i;
+            await new Promise(r=>setTimeout(r,50));
+            if(Math.random()<0.08) {
+                document.getElementById("out").innerText = `KO at ${i}`;
+                if(i<=rng && i>rng-13) {
+                    let m = {13:2, 26:3, 39:4, 52:5}[rng];
+                    addWin(bet*m);
+                }
+                break;
+            }
+        }
+        this.disabled=false;
+    };
+}
+
+// 6. CRASH
+if(document.body.getAttribute("data-game") === "crash") {
+    let int, m=1, bet=0;
+    document.getElementById("betBtn").onclick = () => {
+        bet = parseFloat(document.getElementById("bet").value);
+        if(!bet || bet>balance) return;
+        balance -= bet; saveState();
+        document.getElementById("betBtn").disabled=true; document.getElementById("cashBtn").disabled=false;
+        m=1; document.getElementById("mult").style.color="#0f0";
+        let crash = 0.99/(1-Math.random()); if(Math.random()<0.03) crash=1.0;
+        if(crash<=1.0) { endCrash(true); return; }
+        int = setInterval(() => {
+            m += 0.02 + (m * (document.getElementById("spd").value/100));
+            document.getElementById("mult").innerText = m.toFixed(2)+"x";
+            let auto = parseFloat(document.getElementById("auto").value);
+            if(auto && m>=auto) cashOut();
+            if(m>=crash) endCrash(true);
+        }, 60);
+    };
+    document.getElementById("cashBtn").onclick = cashOut;
+    function cashOut() { if(int) { clearInterval(int); int=null; addWin(bet*m); endCrash(false); } }
+    function endCrash(dead) {
+        if(int) clearInterval(int);
+        document.getElementById("mult").style.color = dead?"#f00":"#d4af37";
+        document.getElementById("out").innerText = dead?"CRASHED":"CASHED OUT";
+        document.getElementById("betBtn").disabled=false; document.getElementById("cashBtn").disabled=true;
     }
-    
-    resetCrashUI();
-    saveState();
-    checkCollector();
 }
-
-function resetCrashUI() {
-    document.getElementById("crashBtn").disabled = false;
-    document.getElementById("cashOutBtn").disabled = true;
-    speedSlider.disabled = false;
-}
-
-document.getElementById("cashOutBtn").addEventListener("click", function() {
-    clearInterval(crashInt);
-    let win = cBet * mult;
-    balance += win;
-    document.getElementById("crashOutput").innerText = `Out at ${mult.toFixed(2)}x! +$${Math.floor(win)}`;
-    document.getElementById("crashBtn").disabled = false;
-    this.disabled = true; saveState();
-});
-
-saveState();
