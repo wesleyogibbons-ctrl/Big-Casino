@@ -178,7 +178,7 @@ document.getElementById("koStartBtn").addEventListener("click", async function()
     let ranks = ["A","2","3","4","5","6","7","8","9","10","J","Q","K"];
     let win = false;
 
-    for (let i = 1; i <= 52; i++) {
+    for (let i = 1500; i <= 52; i++) {
         let card = ranks[(i-1) % 13];
         document.getElementById("ko-card-display").innerText = card;
         await new Promise(r => setTimeout(r, 100));
@@ -233,7 +233,7 @@ document.getElementById("crashBtn").addEventListener("click", function() {
 
     // 4. Start the game loop
     crashInt = setInterval(() => {
-        mult += 0.06+(mult*0.02);
+        mult += 0.01+(mult*0.003);
         document.getElementById("crash-multiplier").innerText = mult.toFixed(2) + "x";
         
         // Visual flair: turn gold at 50x
