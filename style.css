@@ -42,3 +42,46 @@ input, select { background: #222; color: white; border: 1px solid #555; padding:
 .card-front, .card-back { position: absolute; width: 100%; height: 100%; backface-visibility: hidden; border-radius: 6px; display: flex; align-items: center; justify-content: center; font-weight: bold; border: 2px solid #d4af37; }
 .card-front { background: #222; color: #d4af37; }
 .card-back { background: white; color: black; transform: rotateY(180deg); font-size: 1.5rem; }
+
+/* KNOCKOUT TIERS */
+.ko-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 15px;
+    margin-top: 20px;
+}
+
+.ko-tier-box {
+    background: #1a1a1a;
+    border: 2px solid #333;
+    padding: 15px;
+    border-radius: 8px;
+    transition: 0.3s;
+}
+
+.ko-tier-box.active-tier {
+    border-color: #00ff00;
+    box-shadow: 0 0 10px rgba(0, 255, 0, 0.3);
+    background: #1e2a1e;
+}
+
+.tier-header {
+    font-weight: bold;
+    color: #d4af37;
+    margin-bottom: 5px;
+}
+
+.tier-mult {
+    font-size: 1.2rem;
+    color: #00ffff;
+    margin-bottom: 10px;
+}
+
+.tier-bet {
+    width: 80% !important;
+}
+
+#deck-progress {
+    font-family: monospace;
+    letter-spacing: 1px;
+}
