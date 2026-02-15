@@ -67,29 +67,46 @@
             <div id="blackjackOutput" class="output">Good Luck!</div>
         </section>
 
-        <section class="game-box">
-            <h2 class="gold">Red Dog</h2>
-            <div id="rd-cards" class="hand">Waiting for bet...</div>
-            <input type="number" id="rdBet" placeholder="Bet $">
-            <button id="rdDealBtn" class="casino-btn">DEAL HAND</button>
-            <div id="rdOutput" class="output">Between the spread wins!</div>
-        </section>
-
-        <section class="game-box">
-            <h2 class="gold">Knockout 52</h2>
-            <div id="ko-card-display" class="ko-card">?</div>
-            <div class="input-row">
-                <select id="koRange">
-                    <option value="13">Cards 1-13 (2x)</option>
-                    <option value="26">Cards 14-26 (3x)</option>
-                    <option value="39">Cards 27-39 (4x)</option>
-                    <option value="52">Cards 40-52 (5x)</option>
-                </select>
-                <input type="number" id="koBet" placeholder="Bet $">
+       <section class="game-box">
+    <h2 class="gold">Red Dog</h2>
+    
+    <div class="rd-table">
+        <div class="card-slot">
+            <div id="rd-card-1" class="card-inner">
+                <div class="card-front">?</div>
+                <div class="card-back" id="val-1"></div>
             </div>
-            <button id="koStartBtn" class="casino-btn">START RACE</button>
-            <div id="koOutput" class="output">Match rank to count!</div>
-        </section>
+        </div>
+        
+        <div class="card-slot center-card">
+            <div id="rd-card-3" class="card-inner">
+                <div class="card-front">?</div>
+                <div class="card-back" id="val-3"></div>
+            </div>
+        </div>
+
+        <div class="card-slot">
+            <div id="rd-card-2" class="card-inner">
+                <div class="card-front">?</div>
+                <div class="card-back" id="val-2"></div>
+            </div>
+        </div>
+    </div>
+
+    <div id="rd-multiplier-tag" class="gold" style="height: 20px; margin: 10px 0; font-size: 0.9rem;"></div>
+    
+    <div id="rd-controls">
+        <input type="number" id="rdBet" placeholder="Bet $">
+        <button id="rdDealBtn" class="casino-btn">DEAL</button>
+    </div>
+
+    <div id="rd-action-btns" style="display: none;">
+        <button id="rdRaiseBtn" class="casino-btn" style="background: #4caf50;">RAISE (2x) & DRAW</button>
+        <button id="rdCallBtn" class="casino-btn">STAND & DRAW</button>
+    </div>
+    
+    <div id="rdOutput" class="output">Place your bet!</div>
+</section>
 
         <section class="game-box">
         <h2 class="gold">Crash</h2>
