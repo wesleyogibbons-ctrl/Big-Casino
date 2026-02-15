@@ -215,26 +215,77 @@ if(document.body.getAttribute("data-game") === "reddog") {
     }
 }
 
-// 5. KNOCKOUT
+// 5. KNOCKOUT (Multi-Tier Upgrade)
 if(document.body.getAttribute("data-game") === "knockout") {
     document.getElementById("startBtn").onclick = async function() {
-        let bet = parseFloat(document.getElementById("bet").value);
-        let rng = parseInt(document.getElementById("range").value);
-        if(!bet || bet>balance) return;
-        balance -= bet; this.disabled=true; saveState();
-        for(let i=1; i<=52; i++) {
-            document.getElementById("cardDisplay").innerText = i;
-            await new Promise(r=>setTimeout(r,50));
-            if(Math.random()<0.08) {
-                document.getElementById("out").innerText = `KO at ${i}`;
-                if(i<=rng && i>rng-13) {
-                    let m = {13:2, 26:3, 39:4, 52:5}[rng];
-                    addWin(bet*m);
+        const tierInputs = [
+            { id: 1, bet: parseFloat(document.getElementById("bet-1").value) || 0, mult: 2.5 },
+            { id: 2, bet: parseFloat(document.getElementById("bet-2").value) || 0, mult: 4.0 },
+            { id: 3, bet: parseFloat(document.getElementById("bet-3").value) || 0, mult: 6.5 },
+            { id: 4, bet: parseFloat(document.getElementById("bet-4").value) || 0, mult: 12.0 }
+        ];
+
+        let totalBet = tierInputs.reduce((sum, t) => sum + t.bet, 0);
+        
+        if (totalBet <= 0 || totalBet > balance) {
+            alert("Invalid total bet or insufficient funds!");
+            return;
+        }
+
+        // Deduct balance and Lock UI
+        balance -= totalBet;
+        this.disabled = true;
+        document.querySelectorAll(".tier-bet").forEach(i => i.disabled = true);
+        saveState();
+
+        const ranks = ["A", "2", "3", "4", "5", "6", "7", "8", "9", "10", "J", "Q", "K"];
+        let koOccurred = false;
+
+        document.getElementById("out").innerText = "Race in progress...";
+
+        for (let i = 1; i <= 52; i++) {
+            // Determine current tier based on card count
+            let currentTier = Math.ceil(i / 13);
+            
+            // Visual feedback: Highlight the active tier box
+            document.querySelectorAll(".ko-tier-box").forEach(b => b.classList.remove("active-tier"));
+            document.getElementById(`tier-${currentTier}`).classList.add("active-tier");
+
+            // Update display
+            let currentRank = ranks[(i - 1) % 13];
+            document.getElementById("cardDisplay").innerText = currentRank;
+            document.getElementById("cardCount").innerText = i;
+
+            await new Promise(r => setTimeout(r, 150)); // Slightly slower for tension
+
+            // Check for Knockout (Match rank to index)
+            // Logic: Card 1 is 'A', Card 2 is '2'... Card 14 is 'A' again.
+            if (Math.random() < 0.0769) { // ~1/13 chance
+                koOccurred = true;
+                let activeBet = tierInputs[currentTier - 1];
+                
+                if (activeBet.bet > 0) {
+                    let win = addWin(activeBet.bet * activeBet.mult);
+                    document.getElementById("out").innerText = `KNOCKOUT! Tier ${currentTier} wins $${Math.floor(win)}!`;
+                    document.getElementById("out").style.color = "#00ff00";
+                } else {
+                    document.getElementById("out").innerText = `KO in Tier ${currentTier}, but no bet was placed.`;
+                    document.getElementById("out").style.color = "#ff4d4d";
                 }
                 break;
             }
+
+            if (i === 52) {
+                document.getElementById("out").innerText = "The deck cleared! No knockout.";
+                document.getElementById("out").style.color = "#888";
+            }
         }
-        this.disabled=false;
+
+        // Unlock UI
+        this.disabled = false;
+        document.querySelectorAll(".tier-bet").forEach(i => i.disabled = false);
+        document.querySelectorAll(".ko-tier-box").forEach(b => b.classList.remove("active-tier"));
+        saveState();
     };
 }
 
